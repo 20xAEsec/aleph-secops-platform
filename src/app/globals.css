@@ -11,8 +11,8 @@
   --gl-surface: #0c1226;
   --gl-surface-raised: #101830;
   --gl-ink: #f3f6ff;
-  --gl-ink-muted: #9aa6c4;
-  --gl-ink-subtle: #6b7796;
+  --gl-ink-muted: #b3bdd8;
+  --gl-ink-subtle: #8a95b3;
   --gl-accent: #5df0a8;
   --gl-accent-ink: #032018;
   --gl-line: #16213a;
@@ -54,10 +54,18 @@
   --color-sev-low: var(--sev-low);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains);
+  /* Every weight sits one step heavier than Tailwind's default so type holds up over the scene. */
+  --font-weight-thin: 200;
+  --font-weight-extralight: 300;
+  --font-weight-light: 400;
+  --font-weight-normal: 500;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
+  --font-weight-bold: 800;
 }
 
 html, body { background: var(--gl-bg); color: var(--gl-ink); }
-body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-inter), system-ui, sans-serif; font-weight: 500; -webkit-font-smoothing: antialiased; }
 ::selection { background: rgba(var(--accent-rgb), 0.3); color: #fff; }
 
 /* Component classes live in a layer so Tailwind utilities (lg:hidden, rounded-none, px-*) can override them. */
@@ -72,15 +80,15 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 
 /* ---------- Glass primitives ---------- */
 .glass {
-  background: linear-gradient(180deg, rgba(16, 24, 48, 0.62), rgba(6, 10, 24, 0.7));
+  background: linear-gradient(180deg, rgba(16, 24, 48, 0.88), rgba(6, 10, 24, 0.93));
   border: 1px solid rgba(var(--edge-rgb), 0.09);
-  backdrop-filter: blur(16px) saturate(130%);
-  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
   border-radius: 14px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(var(--edge-rgb), 0.1), inset 0 0 0 1px rgba(var(--accent-rgb), 0.02);
 }
 .glass-hero {
-  background: rgba(4, 8, 22, 0.42);
+  background: rgba(4, 8, 22, 0.74);
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
 }
@@ -92,7 +100,7 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 }
 
 .glass-input {
-  background: rgba(4, 8, 22, 0.55);
+  background: rgba(4, 8, 22, 0.85);
   border: 1px solid rgba(var(--edge-rgb), 0.12);
   border-radius: 10px;
   color: var(--gl-ink);
@@ -109,18 +117,18 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 }
 /* Section headings: same type as the sidebar group titles, in the accent green */
 .kicker {
-  font-family: var(--font-inter), system-ui, sans-serif; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.25;
+  font-family: var(--font-inter), system-ui, sans-serif; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.25;
   background: linear-gradient(180deg, #c8ffe3 0%, var(--gl-accent) 55%, #2fbf7c 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.28)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8));
 }
 .hairline { height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.6), transparent); }
-.copy-shadow { filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.9)); }
+.copy-shadow { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 14px rgba(4, 6, 15, 0.9), 0 0 28px rgba(4, 6, 15, 0.7); }
 
 /* ---------- Buttons ---------- */
 .btn {
   position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  border-radius: 999px; padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 500;
+  border-radius: 999px; padding: 0.6rem 1.15rem; font-size: 0.85rem; font-weight: 600;
   transition: transform var(--gl-duration) var(--gl-ease), box-shadow var(--gl-duration) var(--gl-ease), background var(--gl-duration-fast), opacity var(--gl-duration-fast);
 }
 .btn:focus-visible { outline: 2px solid var(--gl-accent); outline-offset: 3px; }
@@ -128,7 +136,7 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 .btn-primary { background: var(--gl-accent); color: var(--gl-accent-ink); box-shadow: 0 0 22px rgba(var(--accent-rgb), 0.28); }
 .btn-primary:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(var(--accent-rgb), 0.45); }
 .btn-ghost {
-  background: linear-gradient(90deg, rgba(4, 12, 32, 0.55), rgba(10, 26, 58, 0.5), rgba(4, 12, 32, 0.55));
+  background: linear-gradient(90deg, rgba(4, 12, 32, 0.85), rgba(10, 26, 58, 0.82), rgba(4, 12, 32, 0.85));
   border: 1px solid rgba(var(--edge-rgb), 0.18); color: var(--gl-ink);
   backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
@@ -141,7 +149,7 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 .sheen:hover::after, .sheen:focus-visible::after { transform: translateX(120%); }
 
 /* Segmented control */
-.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(4, 8, 22, 0.55); border: 1px solid rgba(var(--edge-rgb), 0.1); }
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(4, 8, 22, 0.85); border: 1px solid rgba(var(--edge-rgb), 0.1); }
 .seg button { padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.78rem; color: var(--gl-ink-muted); transition: all var(--gl-duration-fast); }
 .seg button[aria-pressed="true"] { background: rgba(var(--accent-rgb), 0.14); color: var(--gl-accent); box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.3); }
 
@@ -162,9 +170,9 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 
 /* ---------- Report prose ---------- */
 .prose-aleph { font-size: 0.92rem; line-height: 1.7; color: #d7def2; }
-.prose-aleph h1, .prose-aleph h2 { font-size: 1.05rem; font-weight: 600; color: var(--gl-ink); margin: 1.6rem 0 0.6rem; letter-spacing: 0.01em; }
+.prose-aleph h1, .prose-aleph h2 { font-size: 1.05rem; font-weight: 700; color: var(--gl-ink); margin: 1.6rem 0 0.6rem; letter-spacing: 0.01em; }
 .prose-aleph h2::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 0.6rem; border-radius: 2px; background: var(--gl-accent); box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7); vertical-align: middle; }
-.prose-aleph h3 { font-size: 0.95rem; font-weight: 600; color: var(--gl-ink); margin: 1.2rem 0 0.4rem; }
+.prose-aleph h3 { font-size: 0.95rem; font-weight: 700; color: var(--gl-ink); margin: 1.2rem 0 0.4rem; }
 .prose-aleph > :first-child { margin-top: 0; }
 .prose-aleph p { margin: 0.55rem 0; }
 .prose-aleph ul, .prose-aleph ol { margin: 0.5rem 0 0.5rem 1.2rem; }
@@ -172,14 +180,14 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 .prose-aleph ol { list-style: decimal; }
 .prose-aleph li { margin: 0.25rem 0; }
 .prose-aleph li::marker { color: var(--gl-ink-subtle); }
-.prose-aleph strong { color: var(--gl-ink); font-weight: 600; }
+.prose-aleph strong { color: var(--gl-ink); font-weight: 700; }
 .prose-aleph a { color: var(--gl-accent); text-decoration: underline; text-underline-offset: 3px; }
 .prose-aleph code { font-family: var(--font-jetbrains), monospace; font-size: 0.82em; background: rgba(var(--edge-rgb), 0.08); border: 1px solid rgba(var(--edge-rgb), 0.1); border-radius: 5px; padding: 0.1em 0.35em; color: #cfe0ff; }
 .prose-aleph pre { background: rgba(2, 4, 12, 0.75); border: 1px solid rgba(var(--edge-rgb), 0.1); border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 0.9rem 0; }
 .prose-aleph pre code { background: none; border: 0; padding: 0; font-size: 0.8rem; line-height: 1.6; color: #c9d6f5; }
 .prose-aleph blockquote { border-left: 2px solid rgba(var(--accent-rgb), 0.5); padding: 0.2rem 0 0.2rem 0.9rem; color: var(--gl-ink-muted); margin: 0.8rem 0; }
 .prose-aleph table { width: 100%; border-collapse: collapse; margin: 0.9rem 0; font-size: 0.82rem; display: block; overflow-x: auto; }
-.prose-aleph th { text-align: left; font-weight: 500; color: var(--gl-ink-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.68rem; padding: 0.55rem 0.7rem; border-bottom: 1px solid rgba(var(--edge-rgb), 0.14); }
+.prose-aleph th { text-align: left; font-weight: 600; color: var(--gl-ink-muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.68rem; padding: 0.55rem 0.7rem; border-bottom: 1px solid rgba(var(--edge-rgb), 0.14); }
 .prose-aleph td { padding: 0.55rem 0.7rem; border-bottom: 1px solid rgba(var(--edge-rgb), 0.06); vertical-align: top; }
 }
 
@@ -188,7 +196,7 @@ body { font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoot
 
 /* Sidebar feature-group headings: moonlit gradient type, bold, readable */
 .nav-group-title {
-  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.25;
+  font-size: 0.74rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.25;
   background: linear-gradient(180deg, #ffffff 0%, #e6f1ff 50%, #a9c1e0 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.18)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.8));

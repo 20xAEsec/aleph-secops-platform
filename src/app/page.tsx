@@ -37,7 +37,7 @@ export default function Home() {
 
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
           <div className="rise lg:col-span-6" style={{ animationDelay: "200ms" }}>
-            <p className="copy-shadow max-w-lg text-[0.95rem] leading-relaxed text-ink-muted">
+            <p className="copy-shadow max-w-lg text-[0.95rem] leading-relaxed text-ink">
               Aleph puts Claude on top of SIEM telemetry, threat intel and the team&apos;s knowledge base. Single-purpose agents gather, correlate
               and draft; a deterministic layer checks their work; an analyst makes every decision.
             </p>
@@ -69,7 +69,7 @@ export default function Home() {
             <h2 className="text-[clamp(1.6rem,3.4vw,2.6rem)] font-extralight leading-tight text-ink">
               One request fans out across every connected source.
             </h2>
-            <p className="copy-shadow mt-4 max-w-xl text-[0.92rem] leading-relaxed text-ink-muted">
+            <p className="copy-shadow mt-4 max-w-xl text-[0.92rem] leading-relaxed text-ink">
               Each pillar is a set of purpose-built pipelines. Live features run end to end in this demo. Spec features document how they
               work in the full platform.
             </p>

@@ -103,7 +103,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-white/5 bg-[rgba(4,6,15,0.55)] px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-white/5 bg-[rgba(4,6,15,0.88)] px-4 backdrop-blur-xl sm:px-6">
           <button className="btn btn-ghost px-3 py-1.5 lg:hidden" onClick={() => setOpen(true)} aria-label="Open navigation">☰</button>
           <div className="hidden font-mono text-[0.68rem] uppercase tracking-[0.22em] text-ink-subtle sm:block">SecOps workspace · demo tenant</div>
           <div className="flex items-center gap-2 font-mono text-[0.66rem] uppercase tracking-wider">

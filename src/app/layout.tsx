@@ -4,8 +4,8 @@ import GalaxyBackground from "@/components/GalaxyBackground";
 import AppShell from "@/components/AppShell";
 import "./globals.css";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["200", "300", "400", "500", "600"] });
-const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"], weight: ["400", "500"] });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"] });
+const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"], weight: ["500", "600"] });
 
 export const metadata: Metadata = {
   title: "Aleph · SecOps Workspace",
