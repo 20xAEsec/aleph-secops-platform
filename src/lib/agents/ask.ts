@@ -53,7 +53,7 @@ export async function runAsk(messages: ChatMessage[], emit: Emit) {
 
 function mockAnswer(q: string) {
   const s = q.toLowerCase();
-  const demo = "_Demo mode: set `ANTHROPIC_API_KEY` for live answers._\n\n";
+  const demo = "_Demo data: canned answer._\n\n";
   if (/hunt|beacon|look for|sweep/.test(s)) {
     return `${demo}That's an environment-wide hunt, so I'll hand it to Threat Hunt with a self-contained brief.\n\n\`\`\`route\n{"target": "hunt", "prompt": ${JSON.stringify(`Hunt: ${q.slice(0, 400)}. Success = beaconing or C2 candidates with host, destination, cadence and MITRE mapping.`)}}\n\`\`\``;
   }

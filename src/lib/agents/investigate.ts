@@ -82,7 +82,7 @@ function mockReport(pivot: string, g: Record<string, unknown>) {
   const udm = g.search_udm_events as { matched: number; hosts: string[] } | undefined;
   const known = intel && intel.found !== false;
   const verdict = known && (intel.score ?? 0) >= 70 ? "MALICIOUS (High)" : known ? "SUSPICIOUS (Medium)" : udm?.matched ? "INCONCLUSIVE (Low)" : "BENIGN / NO ACTIVITY (Low)";
-  return `> _Demo mode: assembled deterministically from tool results. Set \`ANTHROPIC_API_KEY\` for the live analyst._
+  return `> _Demo data: assembled deterministically from tool results._
 
 ## Verdict
 **${verdict}**

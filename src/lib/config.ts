@@ -14,8 +14,6 @@ export const config = {
     // Either the full resource name (projects/.../ragCorpora/123) or just the corpus id.
     corpus: process.env.VERTEX_RAG_CORPUS ?? "",
     topK: Number(process.env.VERTEX_RAG_TOP_K ?? 6),
-    // Service account JSON key (for Vercel). Empty means Application Default Credentials.
-    serviceAccountKey: process.env.GCP_SERVICE_ACCOUNT_KEY ?? "",
   },
   maxConcurrentRuns: 5,
 };

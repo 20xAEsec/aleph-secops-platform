@@ -64,7 +64,7 @@ export async function runHunt(input: HuntInput, emit: Emit) {
     async run(ctx, id) {
       const res = await callTool(ctx, id, "search_knowledge_base", { query: input.hypothesis.slice(0, 200) },
         () => retrieveContexts(input.hypothesis),
-        (r) => (r.status === "ok" ? `${r.contexts.length} passage(s) from Vertex RAG` : `${r.status}: ${"error" in r ? r.error : ""}`));
+        (r) => (r.status === "ok" ? `${r.contexts.length} passage(s) from the knowledge base` : `${r.status}: ${"error" in r ? r.error : ""}`));
       if (!("_unavailable" in res) && res.status !== "ok") ctx.gaps.push(`Knowledge base: ${res.error}`);
       state.kb = res;
     },
@@ -161,7 +161,7 @@ function mockFindings(s?: CoverageStats) {
 
 function mockReport(input: HuntInput, s: CoverageStats | undefined, gaps: string[]) {
   const b = s?.beaconCandidates[0];
-  return `> _Demo mode: no \`ANTHROPIC_API_KEY\` is set, so this report was assembled deterministically from the same tool data the agents saw._
+  return `> _Demo data: this report was assembled deterministically from the same tool data the agents saw._
 
 ## Executive Summary
 The hunt for **"${input.hypothesis.slice(0, 140)}"** found a likely command-and-control beacon on **${b?.host ?? "fin-ws-014"}** to **${b?.dst ?? "telemetry-sync.net"}**. The destination is a newly registered domain linked to a tracked financially-motivated actor. Confidence: **High** for beaconing, **Medium** for initial access via a macro document.

@@ -108,11 +108,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="hidden font-mono text-[0.68rem] uppercase tracking-[0.22em] text-ink-subtle sm:block">SecOps workspace · demo tenant</div>
           <div className="flex items-center gap-2 font-mono text-[0.66rem] uppercase tracking-wider">
             <StatusPill
-              ok={status?.llm.live}
-              label={status ? (status.llm.live ? "Claude · live" : "Claude · demo mode") : "Claude · …"}
+              ok={status?.llm.live || null}
+              label={status ? (status.llm.live ? "Claude · live" : "Claude · demo") : "Claude · …"}
               title={status ? `Reasoning: ${status.llm.models.reasoning} · Fast: ${status.llm.models.fast}` : ""}
             />
-            <StatusPill ok={status?.rag.configured} label={status ? (status.rag.configured ? "Vertex RAG · on" : "Vertex RAG · off") : "RAG · …"} title="Knowledge base via Vertex AI RAG Engine" />
+            <StatusPill ok={status?.rag.configured || null} label={status ? (status.rag.configured ? "Vertex RAG · on" : "Knowledge base · demo") : "RAG · …"} title={status?.rag.configured ? "Knowledge base via Vertex AI RAG Engine" : "Seeded demo knowledge base stands in for Vertex AI RAG"} />
             <StatusPill ok={null} label="Telemetry · demo" title="Seeded demo telemetry stands in for Chronicle" />
           </div>
         </header>

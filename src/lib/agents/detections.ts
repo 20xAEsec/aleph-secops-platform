@@ -84,9 +84,9 @@ Output format:
 function mockRule(input: DetectionInput) {
   const risk = { Low: 35, Medium: 50, High: 75, Critical: 100 }[input.severity] ?? 75;
   if (input.language !== "YARA-L") {
-    return `> _Demo mode: canned rule. Set \`ANTHROPIC_API_KEY\` for live generation._\n\nDetects hidden, encoded PowerShell spawned by Office applications.\n\n\`\`\`${input.language.toLowerCase()}\n// Office spawning encoded PowerShell. Severity: ${input.severity}. MITRE T1059.001\nDeviceProcessEvents\n| where InitiatingProcessFileName in~ ("excel.exe","winword.exe","outlook.exe")\n| where FileName =~ "powershell.exe" and ProcessCommandLine has_any ("-enc","-encodedcommand")\n| project Timestamp, DeviceName, AccountName, ProcessCommandLine\n\`\`\`\n\n**Tuning notes**\n- Exclude signed IT automation parents if they use encoded commands.`;
+    return `> _Demo data: canned rule._\n\nDetects hidden, encoded PowerShell spawned by Office applications.\n\n\`\`\`${input.language.toLowerCase()}\n// Office spawning encoded PowerShell. Severity: ${input.severity}. MITRE T1059.001\nDeviceProcessEvents\n| where InitiatingProcessFileName in~ ("excel.exe","winword.exe","outlook.exe")\n| where FileName =~ "powershell.exe" and ProcessCommandLine has_any ("-enc","-encodedcommand")\n| project Timestamp, DeviceName, AccountName, ProcessCommandLine\n\`\`\`\n\n**Tuning notes**\n- Exclude signed IT automation parents if they use encoded commands.`;
   }
-  return `> _Demo mode: canned rule. Set \`ANTHROPIC_API_KEY\` for live generation._
+  return `> _Demo data: canned rule._
 
 Flags hidden, encoded PowerShell on a host that opened a macro-enabled Office document in the previous 10 minutes. False positives come from IT automation that uses \`-enc\`; scope those out by parent process.
 
