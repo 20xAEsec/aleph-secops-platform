@@ -1,0 +1,44 @@
+{
+  "project": "Aleph — SecOps workspace (interview demo skeleton)",
+  "target": "next (App Router, Tailwind 4) — user's own stack",
+  "style": {
+    "id": "ascend-style",
+    "preview": "https://www.getlayers.ai/?layer=ascend",
+    "tokens": {
+      "gl-bg": "#04060f",
+      "gl-bg-alt": "#060a18",
+      "gl-surface": "#0c1226",
+      "gl-surface-raised": "#101830",
+      "gl-ink": "#f3f6ff",
+      "gl-ink-muted": "#9aa6c4",
+      "gl-ink-subtle": "#6b7796",
+      "gl-accent": "#5df0a8",
+      "gl-accent-ink": "#032018",
+      "gl-line": "#16213a",
+      "gl-glow": "#3a6cff",
+      "gl-font-display": "Inter",
+      "gl-font-body": "Inter",
+      "gl-font-mono": "JetBrains Mono (added for SOC readouts)"
+    }
+  },
+  "scenes": [],
+  "compositions": {
+    "home.hero": "gring-x-hero — headline high, bottom band: description + CTAs left, metrics grid right",
+    "home.pillars": "vexon-showcase — label-left / statement-right over a three-card triptych (the three Aleph pillars)"
+  },
+  "choreography": "Simplified (app shell visited many times a day): no loader, staggered fade-up on content only.",
+  "backgrounds": [
+    {
+      "id": "violet-galaxy-beams",
+      "preview": "https://www.getlayers.ai/?layer=violet-galaxy-beams",
+      "slot": "app-wide fixed background (the nebula scene was removed; no WebGL context in the app)",
+      "file": "src/components/GalaxyBackground.tsx",
+      "media": [
+        "public/backgrounds/violet-galaxy-beams.mp4 (4K master)",
+        "public/backgrounds/violet-galaxy-beams.webp (2K poster)"
+      ],
+      "tint": "overlay rgba(4,6,15,0.45) toward Ascend gl-bg; pixels untouched (contract: motion+composition preserved)",
+      "reducedMotion": "paused on poster"
+    }
+  ]
+}
