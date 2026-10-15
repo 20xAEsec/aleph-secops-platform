@@ -182,6 +182,8 @@ body { font-family: var(--font-inter), system-ui, sans-serif; font-weight: 500; 
 .prose-aleph li::marker { color: var(--gl-ink-subtle); }
 .prose-aleph strong { color: var(--gl-ink); font-weight: 700; }
 .prose-aleph a { color: var(--gl-accent); text-decoration: underline; text-underline-offset: 3px; }
+/* An indicator the agents cited (domain, host, principal). Reads as data, never as a link. */
+.prose-aleph .indicator { font-family: var(--font-jetbrains), monospace; font-size: 0.86em; color: #cfe0ff; word-break: break-all; }
 .prose-aleph code { font-family: var(--font-jetbrains), monospace; font-size: 0.82em; background: rgba(var(--edge-rgb), 0.08); border: 1px solid rgba(var(--edge-rgb), 0.1); border-radius: 5px; padding: 0.1em 0.35em; color: #cfe0ff; }
 .prose-aleph pre { background: rgba(2, 4, 12, 0.75); border: 1px solid rgba(var(--edge-rgb), 0.1); border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 0.9rem 0; }
 .prose-aleph pre code { background: none; border: 0; padding: 0; font-size: 0.8rem; line-height: 1.6; color: #c9d6f5; }

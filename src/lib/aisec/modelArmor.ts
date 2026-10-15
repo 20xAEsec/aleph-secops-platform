@@ -9,6 +9,8 @@
 // verbatim: like a production log policy, the body is withheld and only the verdict is kept.
 // Sensitive values appear as SDP de-identification tokens such as [CREDIT_CARD_NUMBER].
 
+import { CATEGORY_LABEL, type ViolationCategory } from "./taxonomy";
+
 export type ContentRole = "user_prompt" | "model_response" | "tool_result" | "retrieved_context";
 export type Confidence = "LOW_AND_ABOVE" | "MEDIUM_AND_ABOVE" | "HIGH";
 export type Likelihood = "POSSIBLE" | "LIKELY" | "VERY_LIKELY";
@@ -480,32 +482,14 @@ export function allLogs(): PromptLog[] {
 
 // ---------------------------------------------------------------- violation taxonomy
 
-export type ViolationCategory =
-  | "prompt_injection" | "jailbreak" | "data_leakage" | "credential_exposure" | "payment_card_exposure"
-  | "unsanctioned_mcp" | "unauthorized_skill" | "shadow_model" | "unregistered_app"
-  | "data_egress" | "malicious_uri" | "rai_violation" | "restricted_dataset";
-
-export const CATEGORY_LABEL: Record<ViolationCategory, string> = {
-  prompt_injection: "Indirect prompt injection",
-  jailbreak: "Jailbreak / policy evasion",
-  data_leakage: "Sensitive data in prompt or response",
-  credential_exposure: "Credential or key exposure",
-  payment_card_exposure: "Payment card data",
-  unsanctioned_mcp: "Unsanctioned MCP server",
-  unauthorized_skill: "Unauthorized skill use",
-  shadow_model: "Unapproved model",
-  unregistered_app: "Unregistered application",
-  data_egress: "Egress to non-corporate destination",
-  malicious_uri: "Malicious URI",
-  rai_violation: "Responsible-AI violation",
-  restricted_dataset: "Restricted dataset access",
-};
+export type { ViolationCategory } from "./taxonomy";
+export { CATEGORY_LABEL, CATEGORY_SEVERITY, OWASP_MAP } from "./taxonomy";
 
 const CREDENTIAL_TYPES = ["GCP_SERVICE_ACCOUNT_KEY", "GCP_API_KEY", "PASSWORD", "PRIVATE_KEY_PEM", "AUTH_TOKEN"];
 const INTERNAL = [ORG_DOMAIN, ...new Set(Object.values(SANCTIONED_MCP))];
 
 export function isExternalDestination(dest: string): boolean {
-  return !INTERNAL.some((d) => dest.includes(d)) || PERSONAL_EMAIL_DOMAINS.some((d) => dest.includes(d) && dest.includes("personal"));
+  return !INTERNAL.some((d) => dest.includes(d));
 }
 
 export function classify(log: PromptLog): ViolationCategory[] {
@@ -568,10 +552,28 @@ export type LogQuery = {
   principals?: string[];
   filters?: FilterKey[];
   blockedOnly?: boolean;
-  matchedOnly?: boolean;
+  unblockedOnly?: boolean;  // a violation that enforcement let through
+  matchedOnly?: boolean;    // Model Armor filter matched
+  violationsOnly?: boolean; // filter match OR a gateway policy violation (shadow MCP, model, skill)
   daysBack?: number;
   limit?: number;
 };
+
+// A violation is not the same thing as a filter match. Model Armor sees content; the gateway sees
+// which MCP server, skill and model were used. An unsanctioned MCP call is a clean NO_MATCH_FOUND
+// as far as Model Armor is concerned, so hunts for those must not filter on the match state.
+export const isViolation = (l: PromptLog) => l.filterMatchState === "MATCH_FOUND" || classify(l).length > 0;
+
+// Words common in the corpus itself ("prompt", "content", "policy"...) would make almost any
+// free-text hunt match almost everything, so they never participate in the literal match.
+const STOPWORDS = new Set([
+  "prompt", "prompts", "model", "models", "content", "policy", "log", "logs", "data", "record", "records",
+  "returned", "detected", "ticket", "tickets", "query", "request", "user", "users", "internal", "external",
+  "withheld", "blocked", "response", "asked", "agent", "agents", "service", "file", "files", "report",
+  "any", "all", "with", "from", "that", "this", "were", "was", "the", "for", "and", "into", "out", "last",
+  "days", "show", "find", "list", "look", "where", "which", "who", "has", "have", "been", "over", "usage",
+]);
+const IDENTIFIERISH = /[.@_-]|\d/;
 
 const haystack = (l: PromptLog) =>
   [l.principal, l.dept, l.app, l.model, l.client, l.sessionId, l.content, l.geo, l.sourceIp,
@@ -585,34 +587,45 @@ const haystack = (l: PromptLog) =>
 export function searchLogs(q: LogQuery): PromptLog[] {
   const logs = allLogs();
   const since = q.daysBack ? ANCHOR - q.daysBack * 86_400_000 : 0;
-  const words = (q.text ?? "").toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  const all = (q.text ?? "").toLowerCase().split(/[\s,]+/).filter((w) => w.length > 2 && !STOPWORDS.has(w));
+  // With categories in play, only identifier-like words narrow further (a principal, a host, an
+  // infoType); prose words are already represented by the taxonomy.
+  const words = q.categories?.length ? all.filter((w) => IDENTIFIERISH.test(w)) : all;
 
   return logs.filter((l) => {
     if (Date.parse(l.timestamp) < since) return false;
     if (q.matchedOnly && l.filterMatchState !== "MATCH_FOUND") return false;
+    if (q.violationsOnly && !isViolation(l)) return false;
     if (q.blockedOnly && !l.blocked) return false;
+    if (q.unblockedOnly && (l.blocked || !isViolation(l))) return false;
     if (q.apps?.length && !q.apps.includes(l.app)) return false;
     if (q.principals?.length && !q.principals.some((p) => l.principal.includes(p))) return false;
     if (q.filters?.length && !q.filters.some((f) => f in l.filters)) return false;
-    if (q.categories?.length) {
-      const cats = classify(l);
-      if (!q.categories.some((c) => cats.includes(c))) return false;
-    }
-    if (words.length) {
-      const h = haystack(l);
-      if (!words.some((w) => h.includes(w))) return false;
-    }
-    return true;
+
+    // `text` and `categories` both describe *what* is being hunted, so they are alternatives:
+    // free text that names a violation class reaches it through the taxonomy, and text that names
+    // a principal, destination or infoType reaches it literally. Requiring both would find nothing,
+    // because a withheld body never contains the analyst's wording.
+    const catHit = q.categories?.length ? q.categories.some((c) => classify(l).includes(c)) : null;
+    const textHit = words.length ? words.some((w) => haystack(l).includes(w)) : null;
+    if (catHit === null && textHit === null) return true;
+    return Boolean(catHit) || Boolean(textHit);
   });
 }
 
 // ---------------------------------------------------------------- aggregates
 
 export type Bucket = { label: string; value: number; sub?: string };
+export type CategoryDetail = {
+  category: ViolationCategory; label: string; records: number; unblocked: number;
+  topPrincipal: string; apps: string[];
+};
 export type ArmorStats = {
-  total: number; matched: number; blocked: number; unblockedMatches: number;
+  total: number; matched: number; blocked: number; unblockedViolations: number;
+  violations: number;
   sessions: number; principals: number; apps: number;
-  byCategory: Bucket[]; byApp: Bucket[]; byPrincipal: Bucket[]; byFilter: Bucket[]; byInfoType: Bucket[];
+  byCategory: Bucket[]; byCategoryDetail: CategoryDetail[];
+  byApp: Bucket[]; byPrincipal: Bucket[]; byFilter: Bucket[]; byInfoType: Bucket[];
   unsanctionedMcp: Bucket[]; shadowModels: Bucket[]; egress: { destination: string; bytes: number; calls: number; principal: string }[];
   timeline: { date: string; total: number; matched: number; blocked: number }[];
   offHours: number;
@@ -626,13 +639,23 @@ const tally = (xs: string[]): Bucket[] => {
 
 export function statsFor(logs: PromptLog[]): ArmorStats {
   const matched = logs.filter((l) => l.filterMatchState === "MATCH_FOUND");
+  // Category counts run over violations, not filter matches: a gateway violation such as an
+  // unsanctioned MCP call is a clean NO_MATCH_FOUND, and counting only matches would report it as
+  // zero while the egress it caused is plainly in the data.
+  const violations = logs.filter(isViolation);
   const cats: string[] = [];
   const infoTypes: string[] = [];
   const mcp: string[] = [];
   const models: string[] = [];
   const egressMap = new Map<string, { destination: string; bytes: number; calls: number; principal: string }>();
+  const perCat = new Map<ViolationCategory, PromptLog[]>();
 
-  for (const l of matched) cats.push(...classify(l).map((c) => CATEGORY_LABEL[c]));
+  for (const l of violations) {
+    for (const c of classify(l)) {
+      cats.push(CATEGORY_LABEL[c]);
+      perCat.set(c, [...(perCat.get(c) ?? []), l]);
+    }
+  }
   for (const l of logs) {
     for (const f of l.filters.sdp?.findings ?? []) infoTypes.push(f.infoType);
     if (!APPROVED_MODELS.includes(l.model)) models.push(l.model);
@@ -663,13 +686,24 @@ export function statsFor(logs: PromptLog[]): ArmorStats {
     total: logs.length,
     matched: matched.length,
     blocked: logs.filter((l) => l.blocked).length,
-    unblockedMatches: matched.filter((l) => !l.blocked).length,
+    unblockedViolations: violations.filter((l) => !l.blocked).length,
+    violations: violations.length,
     sessions: new Set(logs.map((l) => l.sessionId)).size,
     principals: new Set(logs.map((l) => l.principal)).size,
     apps: new Set(logs.map((l) => l.app)).size,
     byCategory: tally(cats),
+    byCategoryDetail: [...perCat]
+      .map(([category, ls]) => ({
+        category,
+        label: CATEGORY_LABEL[category],
+        records: ls.length,
+        unblocked: ls.filter((l) => !l.blocked).length,
+        topPrincipal: tally(ls.map((l) => l.principal))[0]?.label ?? "—",
+        apps: [...new Set(ls.map((l) => l.app))],
+      }))
+      .sort((a, b) => b.records - a.records),
     byApp: tally(logs.map((l) => APPS[l.app].name)),
-    byPrincipal: tally(matched.map((l) => l.principal)).slice(0, 10),
+    byPrincipal: tally(violations.map((l) => l.principal)).slice(0, 10),
     byFilter: tally(filterNames).map((b) => ({ ...b, label: FILTER_LABEL[b.label] ?? b.label })),
     byInfoType: tally(infoTypes),
     unsanctionedMcp: tally(mcp),
@@ -683,11 +717,35 @@ export function statsFor(logs: PromptLog[]): ArmorStats {
   };
 }
 
-// A compact, model-friendly sample: every matched record first (they are the evidence), then a
-// little benign context, capped so a hunt prompt stays affordable.
-export function sampleForModel(logs: PromptLog[], limit = 60): PromptLog[] {
-  const matched = logs.filter((l) => l.filterMatchState === "MATCH_FOUND");
-  const rest = logs.filter((l) => l.filterMatchState !== "MATCH_FOUND");
-  const step = Math.max(1, Math.floor(rest.length / Math.max(1, limit - matched.length)));
-  return [...matched.slice(0, limit), ...rest.filter((_, i) => i % step === 0).slice(0, Math.max(0, limit - matched.length))];
+// A compact, model-friendly sample: violations first (they are the evidence), then a little benign
+// context, capped so a hunt prompt stays affordable. Fields are flattened and empties dropped.
+export function sampleForModel(logs: PromptLog[], limit = 60): Record<string, unknown>[] {
+  const bad = logs.filter(isViolation);
+  const rest = logs.filter((l) => !isViolation(l));
+  const room = Math.max(0, limit - Math.min(bad.length, limit));
+  const step = Math.max(1, Math.ceil(rest.length / Math.max(1, room)));
+  const chosen = [...bad.slice(0, limit), ...rest.filter((_, i) => i % step === 0).slice(0, room)];
+
+  return chosen.map((l) => {
+    const cats = classify(l);
+    const o: Record<string, unknown> = {
+      ts: l.timestamp, principal: l.principal, dept: l.dept, app: l.app, model: l.model,
+      session: l.sessionId, turn: l.turn, role: l.contentRole, template: l.template.split("/").pop(),
+      enforcement: l.enforcement, match: l.filterMatchState === "MATCH_FOUND", blocked: l.blocked,
+      content: l.content,
+    };
+    if (cats.length) o.violations = cats;
+    if (l.filters.pi_jailbreak) o.injection_confidence = l.filters.pi_jailbreak.confidence;
+    if (l.filters.sdp) o.sdp = l.filters.sdp.findings.map((f) => `${f.infoType}×${f.count} (${f.likelihood})`);
+    if (l.filters.malicious_uris) o.malicious_uris = l.filters.malicious_uris.uris;
+    if (l.filters.rai) o.rai = l.filters.rai.categories.map((c) => `${c.type}:${c.confidence}`);
+    if (l.toolCalls?.length) {
+      o.tools = l.toolCalls.map((t) => {
+        const allowed = t.kind === "mcp" ? APPS[l.app].mcpAllow.includes(t.server ?? "") : APPS[l.app].skillAllow.includes(t.name);
+        return `${t.kind}:${t.server ? `${t.server}/` : ""}${t.name}${allowed ? "" : " [NOT IN ALLOWLIST]"}${t.destination ? ` → ${t.destination}` : ""}${t.bytes ? ` (${t.bytes} bytes)` : ""}`;
+      });
+    }
+    if (l.geo !== "US") o.geo = l.geo;
+    return o;
+  });
 }

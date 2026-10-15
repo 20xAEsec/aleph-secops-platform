@@ -7,8 +7,8 @@ import { rankGaps } from "@/lib/coverage";
 // Pillars follow "vexon-showcase" (label 4 | statement 8, over an even triptych).
 
 const METRICS = [
-  { label: "Agent pipelines", value: "6", note: "live in this demo" },
-  { label: "Features mapped", value: String(FEATURES.length), note: "across 3 pillars" },
+  { label: "Agent pipelines", value: "7", note: "live in this demo" },
+  { label: "Features mapped", value: String(FEATURES.length), note: "across 4 pillars" },
   { label: "Coverage gaps", value: String(rankGaps().length), note: "ranked by priority" },
   { label: "Writes without a human", value: "0", note: "by construction" },
 ];
@@ -17,6 +17,8 @@ const PILLAR_MOTIF: Record<string, string> = {
   investigations: "M4 40 L18 22 L30 30 L44 10 L58 24",
   detection: "M6 12 H58 M6 24 H44 M6 36 H52 M6 48 H34",
   intel: "M32 6 L56 20 V44 L32 58 L8 44 V20 Z M32 6 V58 M8 20 L56 44 M56 20 L8 44",
+  // AI security: a shielded node graph — a central model with guarded edges out to tools.
+  aisec: "M32 8 L50 16 V32 Q50 48 32 56 Q14 48 14 32 V16 Z M32 24 V40 M24 32 H40 M32 24 L24 32 M32 24 L40 32 M32 40 L24 32 M32 40 L40 32",
 };
 
 export default function Home() {
@@ -64,7 +66,7 @@ export default function Home() {
       {/* ---------- Pillars ---------- */}
       <section className="py-16">
         <div className="grid gap-6 lg:grid-cols-12">
-          <div className="kicker pt-2 lg:col-span-4">/ Three pillars</div>
+          <div className="kicker pt-2 lg:col-span-4">/ Four pillars</div>
           <div className="lg:col-span-8">
             <h2 className="text-[clamp(1.6rem,3.4vw,2.6rem)] font-extralight leading-tight text-ink">
               One request fans out across every connected source.
@@ -76,7 +78,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {PILLARS.map((p, i) => {
             const features = FEATURES.filter((f) => f.pillar === p.id);
             const first = features.find((f) => f.status === "live") ?? features[0];

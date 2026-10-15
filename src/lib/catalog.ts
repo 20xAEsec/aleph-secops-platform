@@ -2,7 +2,7 @@
 // pages, so they can't drift. `live` features run in this demo; `blueprint` features are
 // documented with how they work in the full platform.
 
-export type PillarId = "investigations" | "detection" | "intel";
+export type PillarId = "investigations" | "detection" | "intel" | "aisec";
 
 export type Feature = {
   slug: string;
@@ -19,6 +19,7 @@ export const PILLARS: { id: PillarId; title: string; kicker: string; blurb: stri
   { id: "investigations", kicker: "01", title: "Security Investigations", blurb: "Hunt hypotheses, investigate indicators and triage cases. Multi-agent pipelines return cited, MITRE-mapped reports." },
   { id: "detection", kicker: "02", title: "Detection Engineering", blurb: "Draft, lint, test and tune rules against real telemetry, and see coverage gaps ranked by risk." },
   { id: "intel", kicker: "03", title: "Threat Intelligence", blurb: "Indicator context, adversary gap analysis and external attack-surface monitoring in one place." },
+  { id: "aisec", kicker: "04", title: "AI Security", blurb: "The company's own AI estate as a monitored surface: Model Armor verdicts joined with gateway context, hunted the same way as endpoint telemetry." },
 ];
 
 const f = (x: Feature) => x;
@@ -89,6 +90,20 @@ export const FEATURES: Feature[] = [
     summary: "External exposure: services, vulnerabilities and trends from ingested scan data.",
     how: ["Dashboard reads scan data already in the SIEM; no live API calls per page view"],
     clever: ["Agents can still query the live scanner API through a tool when investigating"] }),
+
+  // ---- AI Security
+  f({ slug: "ai-prompt-hunt", title: "AI Prompt Hunt", pillar: "aisec", status: "live", href: "/ai-security",
+    summary: "Hunt GCP Model Armor prompt logs for AI policy breach: injection, data leakage, shadow MCP servers and unapproved models.",
+    how: [
+      "Twelve predefined hunts, each a vetted structured query over the log corpus, run on one click",
+      "Model Armor verdicts are joined with AI gateway context: principal, application, template, MCP server, skill, model and destination",
+      "Findings map onto OWASP LLM Top 10 and MITRE ATLAS from a fixed table, not from the model",
+    ],
+    clever: [
+      "A violation is not the same as a filter match: an unsanctioned MCP call is a clean NO_MATCH_FOUND to Model Armor, so the gateway allowlists are evaluated separately",
+      "Unblocked violations are reported as already delivered, because an INSPECT_ONLY template records without preventing",
+      "Matched bodies are withheld by log policy, so the pipeline reasons from verdicts, infoType counts and tool context rather than prompt text",
+    ] }),
 ];
 
 export const ASK_ALEPH = { title: "Ask Aleph", href: "/ask", summary: "Conversational, read-only assistant that routes big deliverables to the right pipeline." };
